@@ -1,20 +1,22 @@
 import tkinter as tk
+from client import Client
+import argparse
 
 
-def send_answer(categories):
+def send_answer(client, categories):
     # send
     message = ""
     for c in categories:
         message += c.get() + ';'
-    print(message)
+    client.send(message)
 
 
-def show_window(categories):
+def show_window(client):
     window = tk.Tk()
     window.title("Państwa-miasta")
 
     cat = []
-    for i in range(len(categories)):
+    for i in range(len(client.categories)):
         cat.append(tk.StringVar())
 
     informationFrame = tk.Frame(master=window)
@@ -41,11 +43,11 @@ def show_window(categories):
     categoriesFrame = tk.Frame(master=window)
     categoriesFrame.pack(padx=10, pady=10)
 
-    category1Label = tk.Label(categoriesFrame, text=categories[0]).grid(row=1, column=0)
-    category2Label = tk.Label(categoriesFrame, text=categories[1]).grid(row=1, column=1)
-    category3Label = tk.Label(categoriesFrame, text=categories[2]).grid(row=1, column=2)
-    category4Label = tk.Label(categoriesFrame, text=categories[3]).grid(row=1, column=3)
-    category5Label = tk.Label(categoriesFrame, text=categories[4]).grid(row=1, column=4)
+    category1Label = tk.Label(categoriesFrame, text=client.categories[0]).grid(row=1, column=0)
+    category2Label = tk.Label(categoriesFrame, text=client.categories[1]).grid(row=1, column=1)
+    category3Label = tk.Label(categoriesFrame, text=client.categories[2]).grid(row=1, column=2)
+    category4Label = tk.Label(categoriesFrame, text=client.categories[3]).grid(row=1, column=3)
+    category5Label = tk.Label(categoriesFrame, text=client.categories[4]).grid(row=1, column=4)
 
     category1Entry = tk.Entry(categoriesFrame, textvariable=cat[0]).grid(row=2)
     category2Entry = tk.Entry(categoriesFrame, textvariable=cat[1]).grid(row=2, column=1)
@@ -54,7 +56,7 @@ def show_window(categories):
     category5Entry = tk.Entry(categoriesFrame, textvariable=cat[4]).grid(row=2, column=4)
 
     sendButton = tk.Button(window, text='Wyślij', command=lambda
-        catToSend=cat : send_answer(catToSend)).pack(padx=10, pady=10)
+        catToSend=cat : send_answer(client, catToSend)).pack(padx=10, pady=10)
 
     scoreInGameFrame = tk.Frame(master=window)
     scoreInGameFrame.pack(padx=10, pady=10)
@@ -66,3 +68,26 @@ def show_window(categories):
     scoreInGameEntry = tk.Entry(scoreInGameFrame, state='disabled', textvariable=score).grid(row=0, column=1)
 
     window.mainloop()
+
+
+def update_window():
+    window.mainloop()
+
+    #while True:
+    #    window.update_idletasks()
+    #    window.update()
+
+
+#window = tk.Tk()
+#window.title("Państwa-miasta")
+
+parser = argparse.ArgumentParser()
+parser.add_argument("ip_add", help="Server's ip address")
+parser.add_argument("port_number", help="Server's port number")
+args = parser.parse_args()
+
+HOST = args.ip_add
+PORT = int(args.port_number)
+
+client = Client(HOST, PORT)
+show_window(client)
