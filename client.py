@@ -30,5 +30,6 @@ class Client:
         self.s.close()
 
     def send(self, message):
+        message = str(self.room) + ';' + message
         data = str.encode(message)
         self.s.send(data)
