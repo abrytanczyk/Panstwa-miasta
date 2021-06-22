@@ -2,7 +2,8 @@ import socket
 import random
 import string
 import select
-
+import threading
+import time
 
 def message_categories(cat):
     msg = ''
@@ -49,6 +50,17 @@ def get_letter():
 
 def leave_game():
     pass
+    
+#this function should run in separate thread for each started game
+def time_server():
+    MCAST_GRP = '239.0.0.1'
+    MCAST_PORT = 5007
+    MULTICAST_TTL = 2
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, MULTICAST_TTL)
+    for a in range(60):
+        sock.sendto(a, (MCAST_GRP, MCAST_PORT))
+        time.sleep(60)
 
 
 # socket to listen
