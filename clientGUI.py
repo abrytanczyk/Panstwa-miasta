@@ -112,22 +112,23 @@ def show_window(client):
     scoreInGameLabel = tk.Label(scoreInGameFrame,text='Wynik w grze').grid(row=0)
     scoreInGameEntry = tk.Entry(scoreInGameFrame,state='disabled',textvariable=score).grid(row=0,column=1)
     
+    window.mainloop()
     timeNow = 0
     while timeNow <= 60:
         timeNow = client.get_time()
         timeText.set(timeNow)
-        window.update_idletasks()
+        window.update()
 
     #window.mainloop()
 
 
 # def update_window():
 #    pass
-    # window.mainloop()
-    # maybe overriding this method is necessary
-    # while True:
-    #    window.update_idletasks()
-    #    window.update()
+#     window.mainloop()
+     #maybe overriding this method is necessary
+#     while True:
+#        window.update_idletasks()
+#        window.update()
 
 
 parser = argparse.ArgumentParser()

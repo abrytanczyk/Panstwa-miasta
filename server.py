@@ -166,7 +166,7 @@ while True:
                     for client in sockets_in_room[room_number]:
                         client[0].send(str.encode(l))
                     # start sending time
-                    thread.start_new_thread( print_time, (rooms[room_number][2], ) )
+                    threading.Thread( target=time_server, args=(rooms[room_number][2], ) )
 
                 # answers
                 else:

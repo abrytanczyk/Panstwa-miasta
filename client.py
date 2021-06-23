@@ -43,4 +43,5 @@ class Client:
     
     #temporary
     def get_time(self):
+        print('dupa')
         return(self.time_s.recv(10240))
