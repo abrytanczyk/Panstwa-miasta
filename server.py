@@ -52,8 +52,7 @@ def leave_game():
     pass
     
 #this function should run in separate thread for each started game
-def time_server():
-    MCAST_GRP = '239.0.0.1'
+def time_server(MCAST_GRP):
     MCAST_PORT = 5007
     MULTICAST_TTL = 2
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
@@ -151,6 +150,8 @@ while True:
                 data = data_as_bytes.decode()
                 # starting game
                 if data == "Start Game":
+                    # start sending time
+                    thread.start_new_thread( print_time, ('239.0.0.1', ) ) #TODO
                     # send letter to all players in room
                     print("start")
                 # answers
