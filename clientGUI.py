@@ -4,20 +4,41 @@ import argparse
 
 
 ROOM_NUMBER = -1
+letter = ""
 
 
-def send_answer(client, categories):
+def send_answer(client, categories, scoreText):
     # send
     message = ""
     for c in categories:
         message += c.get() + ';'
     client.send(message)
+    #time.sleep(10)
+    get_score(client, scoreText)
 
 
 def set_room(nr, window):
     global ROOM_NUMBER
     ROOM_NUMBER = nr
     window.destroy()
+
+
+def get_score(client, scoreText):
+    data_as_bytes = client.s.recv(1024)
+    data = data_as_bytes.decode()
+    scoreText.set(data)
+
+
+def startGame(client, letterText):
+    msg = str(ROOM_NUMBER) + ";Start Game"
+    print(msg)
+    client.s.send(str.encode(msg))
+    letter_as_bytes = client.s.recv(1024)
+    global letter
+    letter = letter_as_bytes.decode()
+    letterText.set(letter)
+    print(letter)
+    #add disable button
 
 
 def show_welcome_window():
@@ -78,7 +99,9 @@ def show_window(client):
     category5Entry = tk.Entry(categoriesFrame,textvariable=cat[4]).grid(row=2,column=4)
 
     sendButton = tk.Button(window,text='Wyślij',command=lambda
-        catToSend=cat: send_answer(client,catToSend)).pack(padx=10,pady=10)
+        catToSend=cat: send_answer(client,catToSend, score)).pack(padx=10,pady=10)
+
+    startButton = tk.Button(window,text='Rozpocznij',command=lambda:startGame(client, letter)).pack(padx=10,pady=10)
 
     scoreInGameFrame = tk.Frame(master=window)
     scoreInGameFrame.pack(padx=10,pady=10)
