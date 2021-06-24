@@ -50,6 +50,7 @@ def check_letter():
     global game_started
     global window
     global letterText
+    global startButton
     if not game_started:
         to_read,to_write,in_error = select.select([client.s],[],[],0)
         for s in to_read:
@@ -57,6 +58,7 @@ def check_letter():
             letter = letter_as_bytes.decode()
             letterText.set(letter)
             game_started = True
+            startButton.config(state=tk.DISABLED)
             time_refresher()
         window.after(1000, check_letter)
 
@@ -82,6 +84,7 @@ def show_window(client):
     global score
     global timeNow
     global letterText
+    global startButton
     window = tk.Tk()
     window.title("Państwa-miasta")
 
@@ -145,7 +148,6 @@ def show_window(client):
     window.mainloop()
 
 def time_refresher():
-    print('refresh')
     global timeNow
     global timeText
     global game_started
