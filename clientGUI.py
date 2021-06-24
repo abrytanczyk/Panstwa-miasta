@@ -1,6 +1,7 @@
 import tkinter as tk
 from client import Client
 import argparse
+import time
 
 
 ROOM_NUMBER = -1
@@ -13,9 +14,8 @@ def send_answer(client, categories, scoreText):
     message = ""
     for c in categories:
         message += c.get() + ';'
-    print("sending")
     client.send(message)
-    print("send")
+    #time.sleep(10)
     get_score(client, scoreText)
 
 
@@ -35,16 +35,12 @@ def startGame(client, letterText):
     global game_started
     game_started = True
     msg = str(ROOM_NUMBER) + ";Start Game"
-    print(msg)
     client.s.send(str.encode(msg))
     letter_as_bytes = client.s.recv(1024)
     global letter
     letter = letter_as_bytes.decode()
     letterText.set(letter)
-    print(letter)
     time_refresher()
-    #add disable button
-
 
 def show_welcome_window():
     welcomeWindow = tk.Tk()
@@ -142,7 +138,6 @@ def time_refresher():
             timeText.set(str(timeNow))
             window.after(1000, time_refresher) # every second...
         else:
-            print("time ended")
             timeText.set(str(0))
             send_answer(client, cat, score)
             game_started = False
