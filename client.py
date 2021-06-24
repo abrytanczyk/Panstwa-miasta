@@ -22,11 +22,10 @@ class Client:
 
         self.categories = cat_string.rstrip(';').split(';')
 
-        # get multicast address from server
+        # get multicast port from server
         multicast_port_as_bytes = self.s.recv(1024)
         self.multicast_port = multicast_port_as_bytes.decode()
 
-        #print(self.multicast_addr)
         self.time_addr = '239.0.0.1'
         self.time_s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.time_s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

@@ -27,7 +27,7 @@ def prepare_rooms():
     rooms = []
     sockets = []
     tmp = 1
-    # 5 rooms for each room seperate multicast address?
+    # 5 rooms
     for i in range(5):
         tmp_port = '500' + str(tmp)
         cat = categories_for_room()
@@ -108,6 +108,7 @@ def send_score(socket):
     client = get_client(socket)
     socket.send(str(client[-1]).encode())
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument("port_number",help="Server's port number")
 args = parser.parse_args()
@@ -121,19 +122,15 @@ PORT = int(args.port_number)
 
 rooms,sockets_in_room = prepare_rooms()
 
-# need socket with multicast for every room
 
 server_socket.bind((HOST,PORT))
-
 server_socket.listen()
-
 socket_list = [server_socket]
 
 while True:
     to_read,to_write,in_error = select.select(socket_list,[],[],0)
 
     for s in to_read:
-        # print(socket_list)
         # server - accept new connections
         if s == server_socket:
             s_conn,addr = server_socket.accept()
@@ -146,12 +143,8 @@ while True:
             else:
                 sockets_in_room[room[0]].append([s_conn])
                 cat = room[3]
-                # print(addr)
-                # print(cat)
-                # print(room)
-                print(sockets_in_room)
                 s_conn.send(message_categories(cat))
-                # send multicast address
+                # send multicast port
                 s_conn.send(str.encode(room[2]))
                 socket_list.append(s_conn)
 
@@ -195,7 +188,6 @@ while True:
                         # send answered to all client in room and close sockets
                         for client in sockets_in_room[room_number]:
                             send_score(client[0])
-                            #client[0].close()
                             socket_list.remove(client[0])
                             client[0].close()
                         sockets_in_room[room_number].clear()

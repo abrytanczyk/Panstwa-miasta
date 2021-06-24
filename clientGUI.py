@@ -1,7 +1,6 @@
 import tkinter as tk
 from client import Client
 import argparse
-import time
 import select
 
 
@@ -11,12 +10,10 @@ game_started = False
 
 
 def send_answer(client, categories, scoreText):
-    # send
     message = ""
     for c in categories:
         message += c.get() + ';'
     client.send(message)
-    #time.sleep(10)
     get_score(client, scoreText)
 
 
@@ -146,6 +143,7 @@ def show_window(client):
 
     window.after(1000, check_letter)
     window.mainloop()
+
 
 def time_refresher():
     global timeNow
