@@ -103,7 +103,7 @@ def show_window(client):
     category4Entry = tk.Entry(categoriesFrame,textvariable=cat[3]).grid(row=2,column=3)
     category5Entry = tk.Entry(categoriesFrame,textvariable=cat[4]).grid(row=2,column=4)
 
-    sendButton = tk.Button(window,text='Wyślij',command=lambda:send_answer(client,cat, score)).pack(padx=10,pady=10)
+    #sendButton = tk.Button(window,text='Wyślij',command=lambda:send_answer(client,cat, score)).pack(padx=10,pady=10)
 
     startButton = tk.Button(window,text='Rozpocznij',command=lambda:startGame(client, letter)).pack(padx=10,pady=10)
 
@@ -117,20 +117,23 @@ def show_window(client):
     scoreInGameEntry = tk.Entry(scoreInGameFrame,state='disabled',textvariable=score).grid(row=0,column=1)
     
     #window.mainloop()
-    timeNow = 0
+    timeNow = 60
+    global game_started
     while True:
         window.update()
-        window.update_idletasks()
+        #window.update_idletasks()
         if game_started:
             print("started")
-            if timeNow < 19:
+            if timeNow > 1:
                 print("time")
                 timeNow = client.get_time()
                 print(timeNow)
                 timeText.set(str(timeNow))
             else:
                 print("time ended")
-                send_answer(client,cat,score)
+                timeText.set(str(0))
+                send_answer(client, cat, score)
+                game_started = False
 
     #window.mainloop()
 

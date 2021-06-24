@@ -57,9 +57,11 @@ def time_server(MCAST_GRP):
     MULTICAST_TTL = 2
     sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM,socket.IPPROTO_UDP)
     sock.setsockopt(socket.IPPROTO_IP,socket.IP_MULTICAST_TTL,MULTICAST_TTL)
-    for a in range(20):
+    a = 60
+    while a > 0:
         sock.sendto(str.encode(str(a)),(MCAST_GRP,MCAST_PORT))
         time.sleep(1)
+        a -= 1
 
 
 def get_score(socket,room_number):
@@ -194,8 +196,9 @@ while True:
                         # send answered to all client in room and close sockets
                         for client in sockets_in_room[room_number]:
                             send_score(client[0])
-                            client[0].close()
+                            #client[0].close()
                             socket_list.remove(client[0])
+                            client[0].close()
                         sockets_in_room[room_number].clear()
             else:
                 s.close()
