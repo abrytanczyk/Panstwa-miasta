@@ -2,6 +2,7 @@ import tkinter as tk
 from client import Client
 import argparse
 import time
+import select
 
 
 ROOM_NUMBER = -1
@@ -42,6 +43,24 @@ def startGame(client, letterText):
     letterText.set(letter)
     time_refresher()
 
+
+def check_letter():
+    global client
+    global letter
+    global game_started
+    global window
+    global letterText
+    if not game_started:
+        to_read,to_write,in_error = select.select([client.s],[],[],0)
+        for s in to_read:
+            letter_as_bytes = s.recv(1024)
+            letter = letter_as_bytes.decode()
+            letterText.set(letter)
+            game_started = True
+            time_refresher()
+        window.after(1000, check_letter)
+
+
 def show_welcome_window():
     welcomeWindow = tk.Tk()
     welcomeWindow.title("Państwa-miasta - Wybierz pokój")
@@ -62,6 +81,7 @@ def show_window(client):
     global cat
     global score
     global timeNow
+    global letterText
     window = tk.Tk()
     window.title("Państwa-miasta")
 
@@ -76,10 +96,10 @@ def show_window(client):
     letterFrame.grid(row=0,padx=40)
 
     # to display letter letter.set(value)
-    letter = tk.StringVar()
+    letterText = tk.StringVar()
 
     letterLabel = tk.Label(letterFrame,text='Litera').grid(row=0)
-    letterEntry = tk.Entry(letterFrame,state='disabled',textvariable=letter).grid(row=0,column=1)
+    letterEntry = tk.Entry(letterFrame,state='disabled',textvariable=letterText).grid(row=0,column=1)
 
     timeFrame = tk.Frame(master=informationFrame)
     timeFrame.grid(row=0,column=1,padx=40)
@@ -105,7 +125,7 @@ def show_window(client):
     category4Entry = tk.Entry(categoriesFrame,textvariable=cat[3]).grid(row=2,column=3)
     category5Entry = tk.Entry(categoriesFrame,textvariable=cat[4]).grid(row=2,column=4)
 
-    startButton = tk.Button(window,text='Rozpocznij',command=lambda:[startGame(client, letter), startButton.config(state=tk.DISABLED)])
+    startButton = tk.Button(window,text='Rozpocznij',command=lambda:[startGame(client, letterText), startButton.config(state=tk.DISABLED)])
     startButton.pack(padx=10,pady=10)
 
     scoreInGameFrame = tk.Frame(master=window)
@@ -120,7 +140,8 @@ def show_window(client):
     
     timeNow = 60
     timeText.set(str(timeNow))
-    
+
+    window.after(1000, check_letter)
     window.mainloop()
 
 def time_refresher():
