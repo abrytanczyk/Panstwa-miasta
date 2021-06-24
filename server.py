@@ -28,10 +28,10 @@ def prepare_rooms():
     tmp = 1
     # 5 rooms for each room seperate multicast address?
     for i in range(5):
-        tmp_addr = '239.0.0.' + str(tmp)
+        tmp_port = '500' + str(tmp)
         cat = categories_for_room()
-        rooms.append([i,0,tmp_addr,cat])
-        # id, number of clients, multicast address, categories, answers
+        rooms.append([i,0,tmp_port,cat])
+        # id, number of clients, multicast port, categories, answers
         tmp += 1
         sockets.append([])
     return rooms,sockets
@@ -50,16 +50,16 @@ def get_letter():
 
 
 # this function should run in separate thread for each started game
-def time_server(MCAST_GRP):
+def time_server(MCAST_PORT):
     print("enter multicast")
-    print(MCAST_GRP)
-    MCAST_PORT = 5007
+    print(MCAST_PORT)
+    MCAST_GRP = '239.0.0.1'
     MULTICAST_TTL = 2
     sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM,socket.IPPROTO_UDP)
     sock.setsockopt(socket.IPPROTO_IP,socket.IP_MULTICAST_TTL,MULTICAST_TTL)
     a = 60
     while a > 0:
-        sock.sendto(str.encode(str(a)),(MCAST_GRP,MCAST_PORT))
+        sock.sendto(str.encode(str(a)),(MCAST_GRP,int(MCAST_PORT)))
         time.sleep(1)
         a -= 1
 

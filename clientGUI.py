@@ -43,6 +43,7 @@ def startGame(client, letterText):
     letter = letter_as_bytes.decode()
     letterText.set(letter)
     print(letter)
+    time_refresher()
     #add disable button
 
 
@@ -60,6 +61,12 @@ def show_welcome_window():
 
 
 def show_window(client):
+    global timeText
+    global window
+    global game_started
+    global cat
+    global score
+    global timeNow
     window = tk.Tk()
     window.title("Państwa-miasta")
 
@@ -103,9 +110,8 @@ def show_window(client):
     category4Entry = tk.Entry(categoriesFrame,textvariable=cat[3]).grid(row=2,column=3)
     category5Entry = tk.Entry(categoriesFrame,textvariable=cat[4]).grid(row=2,column=4)
 
-    #sendButton = tk.Button(window,text='Wyślij',command=lambda:send_answer(client,cat, score)).pack(padx=10,pady=10)
-
-    startButton = tk.Button(window,text='Rozpocznij',command=lambda:startGame(client, letter)).pack(padx=10,pady=10)
+    startButton = tk.Button(window,text='Rozpocznij',command=lambda:[startGame(client, letter), startButton.config(state=tk.DISABLED)])
+    startButton.pack(padx=10,pady=10)
 
     scoreInGameFrame = tk.Frame(master=window)
     scoreInGameFrame.pack(padx=10,pady=10)
@@ -116,38 +122,31 @@ def show_window(client):
     scoreInGameLabel = tk.Label(scoreInGameFrame,text='Wynik w grze').grid(row=0)
     scoreInGameEntry = tk.Entry(scoreInGameFrame,state='disabled',textvariable=score).grid(row=0,column=1)
     
-    #window.mainloop()
+    
     timeNow = 60
+    timeText.set(str(timeNow))
+    
+    window.mainloop()
+
+def time_refresher():
+    print('refresh')
+    global timeNow
+    global timeText
     global game_started
-    while True:
-        window.update()
-        #window.update_idletasks()
-        if game_started:
-            print("started")
-            if timeNow > 1:
-                print("time")
-                timeNow = client.get_time()
-                print(timeNow)
-                timeText.set(str(timeNow))
-            else:
-                print("time ended")
-                timeText.set(str(0))
-                send_answer(client, cat, score)
-                game_started = False
-
-    #window.mainloop()
-
-
-#def update_window():
-    #while True:
-    #    window.update_idletasks()
-    #   window.update()
-#    pass
-#     window.mainloop()
-     #maybe overriding this method is necessary
-#     while True:
-#        window.update_idletasks()
-#        window.update()
+    global window
+    global client 
+    global cat
+    global score
+    if game_started:
+        if timeNow > 1:
+            timeNow = client.get_time()
+            timeText.set(str(timeNow))
+            window.after(1000, time_refresher) # every second...
+        else:
+            print("time ended")
+            timeText.set(str(0))
+            send_answer(client, cat, score)
+            game_started = False
 
 
 parser = argparse.ArgumentParser()
