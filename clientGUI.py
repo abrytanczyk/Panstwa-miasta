@@ -16,7 +16,6 @@ def send_answer(client, categories, scoreText):
     print("sending")
     client.send(message)
     print("send")
-    #time.sleep(10)
     get_score(client, scoreText)
 
 

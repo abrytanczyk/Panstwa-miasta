@@ -25,6 +25,7 @@ def categories_for_room():
 def prepare_rooms():
     rooms = []
     sockets = []
+    rooms_game_started = []
     tmp = 1
     # 5 rooms for each room seperate multicast address?
     for i in range(5):
@@ -34,12 +35,13 @@ def prepare_rooms():
         # id, number of clients, multicast port, categories, answers
         tmp += 1
         sockets.append([])
-    return rooms,sockets
+        rooms_game_started.append(False)
+    return rooms,sockets,rooms_game_started
 
 
-def get_room(rooms,number):
+def get_room(rooms,number,rooms_game_started):
     clients_max_number = 5
-    if rooms[number][1] < clients_max_number:
+    if rooms[number][1] < clients_max_number and rooms_game_started[number] == False:
         rooms[number][1] += 1
         return rooms[number]
     return -1
@@ -120,9 +122,7 @@ server_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM,0)
 HOST = '127.0.0.1'
 PORT = 12345
 
-rooms,sockets_in_room = prepare_rooms()
-
-# need socket with multicast for every room
+rooms,sockets_in_room,rooms_game_started = prepare_rooms()
 
 server_socket.bind((HOST,PORT))
 
@@ -140,7 +140,7 @@ while True:
             s_conn,addr = server_socket.accept()
             number_as_bytes = s_conn.recv(512)
             number = int(number_as_bytes.decode())
-            room = get_room(rooms,number)
+            room = get_room(rooms,number,rooms_game_started)
             if room == -1:
                 s_conn.send(str.encode("No rooms available"))
                 s_conn.close()
@@ -166,6 +166,7 @@ while True:
                     # send letter to all players in room and start thread with multicast
                     l = get_letter()
                     room_number = int(data.split(';')[0])
+                    rooms_game_started[room_number] = True
                     print("start, letter: " + l)
                     for client in sockets_in_room[room_number]:
                         client[0].send(str.encode(l))
@@ -196,10 +197,11 @@ while True:
                         # send answered to all client in room and close sockets
                         for client in sockets_in_room[room_number]:
                             send_score(client[0])
-                            #client[0].close()
+                            # client[0].close()
                             socket_list.remove(client[0])
                             client[0].close()
                         sockets_in_room[room_number].clear()
+                        rooms_game_started[room_number] = False
             else:
                 s.close()
                 socket_list.remove(s)
