@@ -5,6 +5,7 @@ import argparse
 
 ROOM_NUMBER = -1
 letter = ""
+game_started = False
 
 
 def send_answer(client, categories, scoreText):
@@ -12,7 +13,9 @@ def send_answer(client, categories, scoreText):
     message = ""
     for c in categories:
         message += c.get() + ';'
+    print("sending")
     client.send(message)
+    print("send")
     #time.sleep(10)
     get_score(client, scoreText)
 
@@ -30,6 +33,8 @@ def get_score(client, scoreText):
 
 
 def startGame(client, letterText):
+    global game_started
+    game_started = True
     msg = str(ROOM_NUMBER) + ";Start Game"
     print(msg)
     client.s.send(str.encode(msg))
@@ -98,8 +103,7 @@ def show_window(client):
     category4Entry = tk.Entry(categoriesFrame,textvariable=cat[3]).grid(row=2,column=3)
     category5Entry = tk.Entry(categoriesFrame,textvariable=cat[4]).grid(row=2,column=4)
 
-    sendButton = tk.Button(window,text='Wyślij',command=lambda
-        catToSend=cat: send_answer(client,catToSend, score)).pack(padx=10,pady=10)
+    sendButton = tk.Button(window,text='Wyślij',command=lambda:send_answer(client,cat, score)).pack(padx=10,pady=10)
 
     startButton = tk.Button(window,text='Rozpocznij',command=lambda:startGame(client, letter)).pack(padx=10,pady=10)
 
@@ -112,17 +116,29 @@ def show_window(client):
     scoreInGameLabel = tk.Label(scoreInGameFrame,text='Wynik w grze').grid(row=0)
     scoreInGameEntry = tk.Entry(scoreInGameFrame,state='disabled',textvariable=score).grid(row=0,column=1)
     
-    window.mainloop()
+    #window.mainloop()
     timeNow = 0
-    while timeNow <= 60:
-        timeNow = client.get_time()
-        timeText.set(timeNow)
+    while True:
         window.update()
+        window.update_idletasks()
+        if game_started:
+            print("started")
+            if timeNow < 19:
+                print("time")
+                timeNow = client.get_time()
+                print(timeNow)
+                timeText.set(str(timeNow))
+            else:
+                print("time ended")
+                send_answer(client,cat,score)
 
     #window.mainloop()
 
 
-# def update_window():
+#def update_window():
+    #while True:
+    #    window.update_idletasks()
+    #   window.update()
 #    pass
 #     window.mainloop()
      #maybe overriding this method is necessary

@@ -30,14 +30,14 @@ def prepare_rooms():
     for i in range(5):
         tmp_addr = '239.0.0.' + str(tmp)
         cat = categories_for_room()
-        rooms.append([i, 0, tmp_addr, cat])
+        rooms.append([i,0,tmp_addr,cat])
         # id, number of clients, multicast address, categories, answers
         tmp += 1
         sockets.append([])
-    return rooms, sockets
+    return rooms,sockets
 
 
-def get_room(rooms, number):
+def get_room(rooms,number):
     clients_max_number = 5
     if rooms[number][1] < clients_max_number:
         rooms[number][1] += 1
@@ -49,18 +49,20 @@ def get_letter():
     return random.choice(string.ascii_lowercase)
 
 
-#this function should run in separate thread for each started game
+# this function should run in separate thread for each started game
 def time_server(MCAST_GRP):
+    print("enter multicast")
+    print(MCAST_GRP)
     MCAST_PORT = 5007
     MULTICAST_TTL = 2
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, MULTICAST_TTL)
-    for a in range(60):
-        sock.sendto(a, (MCAST_GRP, MCAST_PORT))
-        time.sleep(60)
+    sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM,socket.IPPROTO_UDP)
+    sock.setsockopt(socket.IPPROTO_IP,socket.IP_MULTICAST_TTL,MULTICAST_TTL)
+    for a in range(20):
+        sock.sendto(str.encode(str(a)),(MCAST_GRP,MCAST_PORT))
+        time.sleep(1)
 
 
-def get_score(socket, room_number):
+def get_score(socket,room_number):
     for client in sockets_in_room[room_number]:
         if client[0] == socket:
             return client[-1]
@@ -80,9 +82,9 @@ def save_score(room_number):
                 continue
             else:
                 for i in range(5):
-                    if client_others[i+1] == '':
+                    if client_others[i + 1] == '':
                         continue
-                    answers_others[i].append(client_others[i+1])
+                    answers_others[i].append(client_others[i + 1])
         print(answers_others)
         for i in range(5):
             if answers[i] == '':
@@ -116,9 +118,9 @@ server_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM,0)
 HOST = '127.0.0.1'
 PORT = 12345
 
-rooms, sockets_in_room = prepare_rooms()
+rooms,sockets_in_room = prepare_rooms()
 
-#need socket with multicast for every room
+# need socket with multicast for every room
 
 server_socket.bind((HOST,PORT))
 
@@ -127,26 +129,26 @@ server_socket.listen()
 socket_list = [server_socket]
 
 while True:
-    to_read, to_write, in_error = select.select(socket_list, [], [], 0)
+    to_read,to_write,in_error = select.select(socket_list,[],[],0)
 
     for s in to_read:
-        #print(socket_list)
+        # print(socket_list)
         # server - accept new connections
         if s == server_socket:
-            s_conn, addr = server_socket.accept()
+            s_conn,addr = server_socket.accept()
             number_as_bytes = s_conn.recv(512)
             number = int(number_as_bytes.decode())
-            room = get_room(rooms, number)
+            room = get_room(rooms,number)
             if room == -1:
                 s_conn.send(str.encode("No rooms available"))
                 s_conn.close()
             else:
                 sockets_in_room[room[0]].append([s_conn])
                 cat = room[3]
-                #print(addr)
-                #print(cat)
-                #print(room)
-                #print(sockets_in_room)
+                # print(addr)
+                # print(cat)
+                # print(room)
+                print(sockets_in_room)
                 s_conn.send(message_categories(cat))
                 # send multicast address
                 s_conn.send(str.encode(room[2]))
@@ -158,7 +160,7 @@ while True:
             if data_as_bytes:
                 data = data_as_bytes.decode()
                 # starting game when server received "[room_nr];Start Game"
-                if re.search("^[0-9]+;Start Game", data):
+                if re.search("^[0-9]+;Start Game",data):
                     # send letter to all players in room and start thread with multicast
                     l = get_letter()
                     room_number = int(data.split(';')[0])
@@ -166,7 +168,8 @@ while True:
                     for client in sockets_in_room[room_number]:
                         client[0].send(str.encode(l))
                     # start sending time
-                    threading.Thread( target=time_server, args=(rooms[room_number][2], ) )
+                    t = threading.Thread(target=time_server,args=(rooms[room_number][2],))
+                    t.start()
 
                 # answers
                 else:
@@ -188,7 +191,7 @@ while True:
                     # check if it was the last client (answer) in room
                     if clients_answered == len(sockets_in_room[room_number]):
                         save_score(room_number)
-                        #send answered to all client in room and close sockets
+                        # send answered to all client in room and close sockets
                         for client in sockets_in_room[room_number]:
                             send_score(client[0])
                             client[0].close()
@@ -197,7 +200,6 @@ while True:
             else:
                 s.close()
                 socket_list.remove(s)
-
 
     # send score - not working (old)
     '''
@@ -213,7 +215,6 @@ while True:
         print('enter error')
         s.close()
         socket_list.remove(s)
-
 
 server_socket.close()
 

@@ -25,8 +25,8 @@ class Client:
         # get multicast address from server
         multicast_addr_as_bytes = self.s.recv(1024)
         self.multicast_addr = multicast_addr_as_bytes.decode()
-        
-        print(self.multicast_addr)
+
+        #print(self.multicast_addr)
         self.time_port = 5007
         self.time_s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.time_s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -40,8 +40,9 @@ class Client:
         message = str(self.room) + ';' + message
         data = str.encode(message)
         self.s.send(data)
-    
+
     #temporary
     def get_time(self):
         print('dupa')
-        return(self.time_s.recv(10240))
+        data_as_bytes = self.time_s.recv(10240)
+        return int(data_as_bytes.decode())
